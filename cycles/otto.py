@@ -3,12 +3,24 @@ import numpy as np
 def otto_cycle(T1, r, T3, gamma):
 
     # ------------------------------------------------
-    # CONSTANTS
+    # GAS CONSTANTS
     # ------------------------------------------------
 
-    R = 287
+    R = 287   # J/kg-K
 
     cv = R / (gamma - 1)
+
+    # ------------------------------------------------
+    # REFERENCE CONDITIONS
+    # ------------------------------------------------
+    # Assumed normalized initial conditions
+    # for thermodynamic visualization
+
+    V1 = 0.001      # m³
+
+    P1 = 101325     # Pa
+
+    S1 = 100        # J/kg-K reference entropy
 
     # ------------------------------------------------
     # STATE 1 → 2
@@ -17,12 +29,22 @@ def otto_cycle(T1, r, T3, gamma):
 
     T2 = T1 * (r ** (gamma - 1))
 
+    V2 = V1 / r
+
+    P2 = P1 * (r ** gamma)
+
+    S2 = S1
+
     # ------------------------------------------------
     # STATE 2 → 3
     # Constant Volume Heat Addition
     # ------------------------------------------------
 
-    # T3 given directly by user
+    V3 = V2
+
+    P3 = P2 * (T3 / T2)
+
+    S3 = S2 + cv * np.log(T3 / T2)
 
     # ------------------------------------------------
     # STATE 3 → 4
@@ -31,23 +53,9 @@ def otto_cycle(T1, r, T3, gamma):
 
     T4 = T3 / (r ** (gamma - 1))
 
-    # ------------------------------------------------
-    # ENTROPY VALUES
-    # ------------------------------------------------
+    V4 = V1
 
-    # Reference entropy baseline
-
-    S1 = 0
-
-    # Isentropic compression
-
-    S2 = S1
-
-    # Constant volume heat addition
-
-    S3 = S2 + cv * np.log(T3 / T2)
-
-    # Isentropic expansion
+    P4 = P3 * (V3 / V4) ** gamma
 
     S4 = S3
 
@@ -79,6 +87,10 @@ def otto_cycle(T1, r, T3, gamma):
 
         "T": [T1, T2, T3, T4],
 
+        "P": [P1, P2, P3, P4],
+
+        "V": [V1, V2, V3, V4],
+
         "S": [S1, S2, S3, S4],
 
         "Q_in": Q_in,
@@ -87,5 +99,11 @@ def otto_cycle(T1, r, T3, gamma):
 
         "W_net": W_net,
 
-        "efficiency": efficiency
+        "efficiency": efficiency,
+
+        "gamma": gamma,
+
+        "R": R,
+
+        "cv": cv
     }

@@ -2,90 +2,63 @@ import numpy as np
 
 def diesel_cycle(T1, r, rc, gamma):
 
-    # ------------------------------------------------
-    # GAS CONSTANTS
-    # ------------------------------------------------
-
-    R = 287  # J/kg-K
-
+    R  = 287
     cv = R / (gamma - 1)
-
     cp = gamma * cv
 
-    # ------------------------------------------------
-    # STATE 1 → 2
-    # Isentropic Compression
-    # ------------------------------------------------
+    # Internal defaults
+    V1 = 0.001
+    P1 = 101325
 
+    # State 2: isentropic compression
     T2 = T1 * (r ** (gamma - 1))
+    V2 = V1 / r
+    P2 = P1 * (r ** gamma)
 
-    # ------------------------------------------------
-    # STATE 2 → 3
-    # Constant Pressure Heat Addition
-    # ------------------------------------------------
-
+    # State 3: constant pressure heat addition
     T3 = T2 * rc
+    V3 = V2 * rc
+    P3 = P2
 
-    # ------------------------------------------------
-    # STATE 3 → 4
-    # Isentropic Expansion
-    # ------------------------------------------------
+    # State 4: isentropic expansion
+    T4 = T3 * (rc / r) ** (gamma - 1)
+    V4 = V1
+    P4 = P3 * (V3 / V4) ** gamma
 
-    T4 = T3 * ((rc / r) ** (gamma - 1))
-
-    # ------------------------------------------------
-    # ENTROPY VALUES
-    # ------------------------------------------------
-
+    # Entropy
     S1 = 100
-
-    # Isentropic compression
-
     S2 = S1
-
-    # Constant pressure heat addition
-
     S3 = S2 + cp * np.log(T3 / T2)
-
-    # Isentropic expansion
-
     S4 = S3
 
-    # ------------------------------------------------
-    # HEAT TRANSFER
-    # ------------------------------------------------
-
-    Q_in = cp * (T3 - T2)
-
+    Q_in  = cp * (T3 - T2)
     Q_out = cv * (T4 - T1)
-
-    # ------------------------------------------------
-    # NET WORK
-    # ------------------------------------------------
-
     W_net = Q_in - Q_out
-
-    # ------------------------------------------------
-    # EFFICIENCY
-    # ------------------------------------------------
-
     efficiency = (W_net / Q_in) * 100
-
-    # ------------------------------------------------
-    # RETURN RESULTS
-    # ------------------------------------------------
 
     return {
 
-        "T": [T1, T2, T3, T4],
+    "T": [T1, T2, T3, T4],
 
-        "S": [S1, S2, S3, S4],
+    "S": [S1, S2, S3, S4],
 
-        "Q_in": Q_in,
+    "V": [V1, V2, V3, V4],
 
-        "Q_out": Q_out,
+    "P": [P1, P2, P3, P4],
 
-        "W_net": W_net,
+    "Q_in": Q_in,
 
-        "efficiency": efficiency
-    }
+    "Q_out": Q_out,
+
+    "W_net": W_net,
+
+    "efficiency": efficiency,
+
+    "gamma": gamma,
+
+    "R": R,
+
+    "cp": cp,
+
+    "cv": cv
+}

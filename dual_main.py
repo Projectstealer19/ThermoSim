@@ -1,35 +1,35 @@
-from cycles.brayton import brayton_cycle
+from cycles.dual import dual_cycle
 
-from utils.brayton_plot import (
-    plot_brayton_pv,
-    plot_brayton_ts
+from utils.dual_plot import (
+    plot_dual_pv,
+    plot_dual_ts
 )
-
-from analysis.brayton_eff_vs_pr import plot_efficiency_vs_rp
 
 # ------------------------------------------------
 # USER INPUTS
 # ------------------------------------------------
 
-T1 = float(input("Enter compressor inlet temperature T1 (K): "))
+T1 = float(input("Enter initial temperature T1 (K): "))
 
-T3 = float(input("Enter turbine inlet temperature T3 (K): "))
+r = float(input("Enter compression ratio r: "))
 
-rp = float(input("Enter pressure ratio rp: "))
+alpha = float(input("Enter pressure ratio alpha (P3/P2): "))
+
+rc = float(input("Enter cut-off ratio rc (V4/V3): "))
 
 gamma = float(input("Enter gamma (Cp/Cv): "))
 
 # ------------------------------------------------
-# RUN BRAYTON SIMULATION
+# RUN DUAL CYCLE
 # ------------------------------------------------
 
-results = brayton_cycle(T1, T3, rp, gamma)
+results = dual_cycle(T1, r, alpha, rc, gamma)
 
 # ------------------------------------------------
 # DISPLAY RESULTS
 # ------------------------------------------------
 
-print("\n===== Brayton Cycle Results =====")
+print("\n===== Dual Cycle Results =====")
 
 print(f"\nT1 = {results['T'][0]:.2f} K")
 
@@ -38,6 +38,8 @@ print(f"T2 = {results['T'][1]:.2f} K")
 print(f"T3 = {results['T'][2]:.2f} K")
 
 print(f"T4 = {results['T'][3]:.2f} K")
+
+print(f"T5 = {results['T'][4]:.2f} K")
 
 print(f"\nHeat Added     = {results['Q_in']:.2f} J/kg")
 
@@ -53,7 +55,7 @@ print(f"Efficiency     = {results['efficiency']:.2f}%")
 
 print("\nState Points:")
 
-for i in range(4):
+for i in range(5):
 
     print(
         f"  State {i+1}: "
@@ -65,8 +67,6 @@ for i in range(4):
 # PLOTS
 # ------------------------------------------------
 
-plot_brayton_pv(results)
+plot_dual_pv(results)
 
-plot_brayton_ts(results)
-
-plot_efficiency_vs_rp(gamma)
+plot_dual_ts(results)
