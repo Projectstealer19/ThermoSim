@@ -1,278 +1,76 @@
-# ------------------------------------------------
-# P-V DIAGRAM FUNCTION
-# ------------------------------------------------
-
 import matplotlib.pyplot as plt
 import numpy as np
 
 def plot_brayton_pv(results):
-
     V1, V2, V3, V4 = results["V"]
-
     P1, P2, P3, P4 = results["P"]
-
-    gamma = results["gamma"]
-
-    # ------------------------------------------------
-    # PROCESS 1 → 2
-    # Isentropic Compression
-    # ------------------------------------------------
+    gamma = 1.4
 
     V12 = np.linspace(V1, V2, 300)
-
     P12 = P1 * (V1 / V12) ** gamma
 
-    # ------------------------------------------------
-    # PROCESS 2 → 3
-    # Constant Pressure Heat Addition
-    # ------------------------------------------------
-
     V23 = np.linspace(V2, V3, 300)
-
     P23 = np.full(300, P2)
 
-    # ------------------------------------------------
-    # PROCESS 3 → 4
-    # Isentropic Expansion
-    # ------------------------------------------------
-
     V34 = np.linspace(V3, V4, 300)
-
     P34 = P3 * (V3 / V34) ** gamma
 
-    # ------------------------------------------------
-    # PROCESS 4 → 1
-    # Constant Pressure Heat Rejection
-    # ------------------------------------------------
-
     V41 = np.linspace(V4, V1, 300)
-
     P41 = np.full(300, P1)
 
-    # ------------------------------------------------
-    # PLOT
-    # ------------------------------------------------
-
     plt.figure(figsize=(9, 6))
+    plt.plot(V12, P12, color='blue', linewidth=2, label='1→2 Isentropic Compression')
+    plt.plot(V23, P23, color='orange', linewidth=2, label='2→3 Constant Pressure Heat Addition')
+    plt.plot(V34, P34, color='green', linewidth=2, label='3→4 Isentropic Expansion')
+    plt.plot(V41, P41, color='red', linewidth=2, label='4→1 Constant Pressure Heat Rejection')
 
-    plt.plot(
-        V12,
-        P12,
-        color='blue',
-        linewidth=2,
-        label='1→2 Isentropic Compression'
-    )
-
-    plt.plot(
-        V23,
-        P23,
-        color='orange',
-        linewidth=2,
-        label='2→3 Constant Pressure Heat Addition'
-    )
-
-    plt.plot(
-        V34,
-        P34,
-        color='green',
-        linewidth=2,
-        label='3→4 Isentropic Expansion'
-    )
-
-    plt.plot(
-        V41,
-        P41,
-        color='red',
-        linewidth=2,
-        label='4→1 Constant Pressure Heat Rejection'
-    )
-
-    # ------------------------------------------------
-    # STATE POINTS
-    # ------------------------------------------------
-
-    V_pts = [V1, V2, V3, V4]
-
-    P_pts = [P1, P2, P3, P4]
-
-    plt.scatter(
-        V_pts,
-        P_pts,
-        color='black',
-        s=60,
-        zorder=5
-    )
+    V_pts, P_pts = [V1, V2, V3, V4], [P1, P2, P3, P4]
+    plt.scatter(V_pts, P_pts, color='black', s=60, zorder=5)
 
     for i, (v, p) in enumerate(zip(V_pts, P_pts)):
-
-        plt.text(
-            v,
-            p,
-            f' {i+1}',
-            fontsize=12,
-            fontweight='bold'
-        )
-
-    # ------------------------------------------------
-    # GRAPH SETTINGS
-    # ------------------------------------------------
+        plt.text(v, p, f' {i+1}', fontsize=12, fontweight='bold')
 
     plt.xlabel("Volume (m³)")
-
     plt.ylabel("Pressure (Pa)")
-
     plt.title("Ideal Brayton Cycle P-V Diagram")
-
     plt.grid(True)
-
     plt.legend()
-
-    plt.figtext(
-        0.12,
-        0.01,
-        "Assumptions: Ideal gas, reference initial conditions used",
-        fontsize=8,
-        color='gray'
-    )
-
     plt.tight_layout()
-
     plt.show()
 
-# ------------------------------------------------
-# T-S DIAGRAM FUNCTION
-# ------------------------------------------------
-
 def plot_brayton_ts(results):
-
     S1, S2, S3, S4 = results["S"]
-
     T1, T2, T3, T4 = results["T"]
-
     cp = results["cp"]
 
-    # ------------------------------------------------
-    # PROCESS 1 → 2
-    # Isentropic Compression
-    # ------------------------------------------------
-
     S12 = np.full(300, S1)
-
     T12 = np.linspace(T1, T2, 300)
 
-    # ------------------------------------------------
-    # PROCESS 2 → 3
-    # Constant Pressure Heat Addition
-    # ------------------------------------------------
-
     T23 = np.linspace(T2, T3, 300)
-
     S23 = S2 + cp * np.log(T23 / T2)
 
-    # ------------------------------------------------
-    # PROCESS 3 → 4
-    # Isentropic Expansion
-    # ------------------------------------------------
-
     S34 = np.full(300, S3)
-
     T34 = np.linspace(T3, T4, 300)
 
-    # ------------------------------------------------
-    # PROCESS 4 → 1
-    # Constant Pressure Heat Rejection
-    # ------------------------------------------------
-
     T41 = np.linspace(T4, T1, 300)
-
     S41 = S4 + cp * np.log(T41 / T4)
 
-    # ------------------------------------------------
-    # PLOT
-    # ------------------------------------------------
-
     plt.figure(figsize=(9, 6))
+    plt.plot(S12, T12, color='blue', linewidth=2, label='1→2 Isentropic Compression')
+    plt.plot(S23, T23, color='orange', linewidth=2, label='2→3 Constant Pressure Heat Addition')
+    plt.plot(S34, T34, color='green', linewidth=2, label='3→4 Isentropic Expansion')
+    plt.plot(S41, T41, color='red', linewidth=2, label='4→1 Constant Pressure Heat Rejection')
 
-    plt.plot(
-        S12,
-        T12,
-        color='blue',
-        linewidth=2,
-        label='1→2 Isentropic Compression'
-    )
-
-    plt.plot(
-        S23,
-        T23,
-        color='orange',
-        linewidth=2,
-        label='2→3 Constant Pressure Heat Addition'
-    )
-
-    plt.plot(
-        S34,
-        T34,
-        color='green',
-        linewidth=2,
-        label='3→4 Isentropic Expansion'
-    )
-
-    plt.plot(
-        S41,
-        T41,
-        color='red',
-        linewidth=2,
-        label='4→1 Constant Pressure Heat Rejection'
-    )
-
-    # ------------------------------------------------
-    # STATE POINTS
-    # ------------------------------------------------
-
-    S_pts = [S1, S2, S3, S4]
-
-    T_pts = [T1, T2, T3, T4]
-
-    plt.scatter(
-        S_pts,
-        T_pts,
-        color='black',
-        s=60,
-        zorder=5
-    )
+    S_pts, T_pts = [S1, S2, S3, S4], [T1, T2, T3, T4]
+    plt.scatter(S_pts, T_pts, color='black', s=60, zorder=5)
 
     for i, (s, t) in enumerate(zip(S_pts, T_pts)):
-
-        plt.text(
-            s,
-            t,
-            f' {i+1}',
-            fontsize=12,
-            fontweight='bold'
-        )
-
-    # ------------------------------------------------
-    # GRAPH SETTINGS
-    # ------------------------------------------------
+        plt.text(s, t, f' {i+1}', fontsize=12, fontweight='bold')
 
     plt.xlabel("Entropy (J/kg-K)")
-
     plt.ylabel("Temperature (K)")
-
     plt.title("Ideal Brayton Cycle T-S Diagram")
-
     plt.grid(True)
-
     plt.legend()
-
-    plt.figtext(
-        0.12,
-        0.01,
-        "Assumptions: Ideal gas, reference entropy baseline used",
-        fontsize=8,
-        color='gray'
-    )
-
     plt.tight_layout()
-
     plt.show()

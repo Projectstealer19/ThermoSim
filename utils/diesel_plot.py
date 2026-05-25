@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 def plot_diesel_pv(results):
 
     V1, V2, V3, V4 = results["V"]

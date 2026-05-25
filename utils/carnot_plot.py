@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 def plot_pv_diagram(results):
 
     V1, V2, V3, V4 = results["V"]
@@ -58,7 +59,8 @@ def plot_pv_diagram(results):
     plt.grid(True, which='both')
     plt.legend()
     plt.tight_layout()
-    plt.show()
+    # plt.show()
+    return plt.gcf()
 
 
 # ------------------------------------------------
@@ -188,4 +190,5 @@ def plot_ts_diagram(results):
 
     plt.tight_layout()
 
-    plt.show()
+    # plt.show()
+    return plt.gcf()
