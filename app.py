@@ -211,7 +211,7 @@ button[aria-label*="heme"],
     font-weight: 400;
     letter-spacing: 0.20em;
     text-transform: uppercase;
-    color: #5A6E8C;
+    color: #7A92B0;
     margin-top: 14px;
     margin-bottom: 36px;
 }}
@@ -229,10 +229,10 @@ button[aria-label*="heme"],
 
 /* ── Cycle card ─────────────────────────────────── */
 .ts-card {{
-    background: rgba(13, 18, 32, 0.68);
+    background: rgba(18, 26, 46, 0.78);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.11);
     border-radius: 14px;
     padding: 16px 18px 14px;
     margin-bottom: 10px;
@@ -266,7 +266,7 @@ button[aria-label*="heme"],
 .ts-card-title {{
     font-size: 14.5px !important;
     font-weight: 600 !important;
-    color: #E8EEF8 !important;
+    color: #FFFFFF !important;
     letter-spacing: 0.01em;
     margin: 0 !important;
     line-height: 1.3;
@@ -274,7 +274,7 @@ button[aria-label*="heme"],
 
 .ts-card-desc {{
     font-size: 12px !important;
-    color: #6B7E99 !important;
+    color: #9AAFC8 !important;
     line-height: 1.55;
     margin: 0 !important;
     padding-left: 24px;   /* aligns under title, past the icon */
