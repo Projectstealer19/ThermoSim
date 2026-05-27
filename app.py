@@ -195,8 +195,6 @@ div.stButton > button {{
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.03),
         0 6px 16px rgba(0,0,0,0.18) !important;
-    position: relative !important;
-    overflow: hidden !important;
 }}
 
 div.stButton > button:hover {{
@@ -214,83 +212,7 @@ div.stButton > button:hover {{
         0 8px 24px rgba(0,0,0,0.3) !important;
 }}
 
-/* ---- LAUNCHING state — applied by JS on click ---- */
-
-div.stButton > button.btn-launching {{
-    border: 1px solid rgba(99,162,255,0.70) !important;
-    background: linear-gradient(
-        180deg,
-        rgba(55,80,124,0.98),
-        rgba(24,38,64,0.99)
-    ) !important;
-    color: rgba(255,255,255,0.0) !important;   /* hide text — spinner takes over */
-    box-shadow:
-        0 0 0 3px rgba(59,130,246,0.15),
-        0 0 18px rgba(59,130,246,0.30),
-        0 6px 20px rgba(0,0,0,0.30) !important;
-    transform: translateY(-1px) !important;
-    pointer-events: none !important;
-    cursor: default !important;
-}}
-
-/* tiny spinner rendered as ::after pseudo on the button */
-div.stButton > button.btn-launching::after {{
-    content: "";
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    width: 16px !important;
-    height: 16px !important;
-    margin-top: -8px !important;
-    margin-left: -8px !important;
-    border: 2px solid rgba(147,197,253,0.25) !important;
-    border-top-color: #93C5FD !important;
-    border-radius: 50% !important;
-    animation: btn-spin 0.55s linear infinite !important;
-    box-shadow: 0 0 6px rgba(147,197,253,0.4) !important;
-}}
-
-@keyframes btn-spin {{
-    to {{ transform: rotate(360deg); }}
-}}
-
-/* page-level fade-out on navigate */
-.page-fade-out {{
-    animation: pageFade 0.35s ease forwards !important;
-}}
-
-@keyframes pageFade {{
-    to {{ opacity: 0; }}
-}}
-
 </style>
-
-<script>
-(function() {{
-    function hookButtons() {{
-        var btns = document.querySelectorAll('div.stButton > button');
-        btns.forEach(function(btn) {{
-            if (btn.dataset.launchHooked) return;
-            btn.dataset.launchHooked = '1';
-            btn.addEventListener('click', function() {{
-                // Apply launching style instantly
-                btn.classList.add('btn-launching');
-                // Fade the whole main content area out
-                var main = document.querySelector('[data-testid="stAppViewContainer"] > .main');
-                if (main) {{
-                    main.style.transition = 'opacity 0.35s ease';
-                    main.style.opacity = '0';
-                }}
-                // Streamlit will navigate server-side; the fade covers the brief delay
-            }});
-        }});
-    }}
-    // Re-hook after every Streamlit re-render
-    var obs = new MutationObserver(hookButtons);
-    obs.observe(document.body, {{ childList: true, subtree: true }});
-    hookButtons();
-}})();
-</script>
 """, unsafe_allow_html=True)
 
 # ------------------------------------------------
@@ -348,10 +270,10 @@ for i, cycle in enumerate(cycles):
                 box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
                 transition: border-color 0.25s ease, box-shadow 0.25s ease;
             ">
-                <h3 style="color: white !important; font-size: 20px !important; font-weight: 600 !important; margin: 0 0 6px 0 !important;">
+                <h3 style="color: white !important; font-size: 16px !important; font-weight: 600 !important; margin: 0 0 5px 0 !important;">
                     {cycle['icon']}&nbsp; {cycle['name']}
                 </h3>
-                <p style="color: #E2E8F0 !important; font-size: 14.5px !important; margin: 0 0 16px 0 !important; opacity: 0.85;">
+                <p style="color: #E2E8F0 !important; font-size: 13.5px !important; margin: 0 0 14px 0 !important; opacity: 0.75;">
                     {cycle['desc']}
                 </p>
             </div>
