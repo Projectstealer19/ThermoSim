@@ -1,5 +1,6 @@
 import streamlit as st
 import base64
+import time
 
 # ------------------------------------------------
 # PAGE CONFIG
@@ -23,7 +24,7 @@ def get_base64(file_path):
 bg_image = get_base64("assets/ThermoSim_background_image.png")
 
 # ------------------------------------------------
-# CUSTOM CSS
+# CUSTOM CSS  — dark-only, all 12 refinements
 # ------------------------------------------------
 
 st.markdown(f"""
@@ -32,15 +33,16 @@ st.markdown(f"""
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* ------------------------------------------------ */
-/* GLOBAL */
+/* GLOBAL — always dark, no light-mode toggle       */
 /* ------------------------------------------------ */
 
 html, body, [class*="css"] {{
     font-family: 'Inter', sans-serif;
+    color-scheme: dark !important;
 }}
 
 /* ------------------------------------------------ */
-/* BACKGROUND */
+/* BACKGROUND — reduced opacity renders (0.18)      */
 /* ------------------------------------------------ */
 
 .stApp {{
@@ -50,6 +52,7 @@ html, body, [class*="css"] {{
     background-attachment: fixed;
 }}
 
+/* dark overlay — slightly heavier to suppress visual noise */
 .stApp::before {{
     content: "";
     position: fixed;
@@ -57,123 +60,349 @@ html, body, [class*="css"] {{
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.42);
+    background: rgba(0, 0, 0, 0.62);
     z-index: -1;
 }}
 
 /* ------------------------------------------------ */
-/* REMOVE STREAMLIT DEFAULTS */
+/* REMOVE STREAMLIT DEFAULTS & LIGHT-MODE ARTIFACTS */
 /* ------------------------------------------------ */
 
-header {{
-    visibility: hidden;
+header {{ visibility: hidden; }}
+footer {{ visibility: hidden; }}
+#MainMenu {{ visibility: hidden; }}
+
+/* force dark on every Streamlit-injected element */
+[data-testid="stAppViewContainer"],
+[data-testid="stHeader"],
+[data-testid="stToolbar"],
+[data-baseweb="select"],
+[data-baseweb="input"],
+.stTextInput, .stSelectbox {{
+    background-color: transparent !important;
+    color: white !important;
 }}
 
-footer {{
-    visibility: hidden;
-}}
-
-#MainMenu {{
-    visibility: hidden;
-}}
+/* kill any theme toggle Streamlit injects */
+[data-testid="stDecoration"],
+[aria-label="Toggle theme"],
+button[kind="icon"] {{ display: none !important; }}
 
 /* ------------------------------------------------ */
-/* MAIN CONTAINER */
+/* MAIN CONTAINER — tighter, denser layout          */
 /* ------------------------------------------------ */
 
 .block-container {{
-    max-width: 1150px;
-    padding-top: 1.5rem;
-    padding-bottom: 2rem;
+    max-width: 1100px;
+    padding-top: 1.2rem !important;
+    padding-bottom: 1.5rem !important;
 }}
 
 /* ------------------------------------------------ */
-/* TITLE */
+/* PAGE ENTRY ANIMATION — cards fade up with stagger */
+/* ------------------------------------------------ */
+
+@keyframes fadeUp {{
+    from {{
+        opacity: 0;
+        transform: translateY(22px);
+    }}
+    to {{
+        opacity: 1;
+        transform: translateY(0);
+    }}
+}}
+
+.card-animate {{
+    animation: fadeUp 0.55s ease both;
+}}
+
+/* ------------------------------------------------ */
+/* TITLE — dominant visual hierarchy                */
 /* ------------------------------------------------ */
 
 .main-title {{
     text-align: center;
-    font-size: 36px;
+    font-size: 42px;
     font-weight: 700;
-    letter-spacing: -0.01em !important;
-    margin-bottom: 6px;
-    margin-top: 4px;
+    letter-spacing: 0.04em !important;
+    margin-bottom: 4px;
+    margin-top: 2px;
+    line-height: 1.1;
 }}
 
-.white-text {{
-    color: white;
-}}
-
-.blue-text {{
-    color: #3B82F6;
-    margin-left: 3px;
-}}
+.white-text {{ color: white; }}
+.blue-text  {{ color: #3B82F6; margin-left: 3px; }}
 
 /* ------------------------------------------------ */
-/* SUBTITLE */
+/* SUBTITLE — muted, smaller                        */
 /* ------------------------------------------------ */
 
 .subtitle {{
     text-align: center;
-    font-size: 19px;
-    color: #93C5FD !important;
-    margin-bottom: 32px;
-    font-weight: 600 !important;
+    font-size: 15px;
+    color: #64748B !important;
+    margin-bottom: 24px;
+    font-weight: 500 !important;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }}
 
 /* ------------------------------------------------ */
-/* BUTTON (ORIGINAL SIZES PRESERVED PERFECTLY) */
+/* CYCLE CARD — glassmorphism + hover interaction   */
+/* ------------------------------------------------ */
+
+.cycle-card {{
+    background: rgba(12, 18, 30, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 18px;
+    padding: 20px 22px 18px 22px;
+    margin-top: 10px;
+    margin-bottom: 12px;
+    box-shadow:
+        0 2px 4px rgba(0,0,0,0.3),
+        0 8px 20px rgba(0,0,0,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+    transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+    cursor: default;
+}}
+
+.cycle-card:hover {{
+    transform: translateY(-5px);
+    border-color: rgba(59, 130, 246, 0.35);
+    box-shadow:
+        0 2px 4px rgba(0,0,0,0.3),
+        0 14px 32px rgba(0,0,0,0.32),
+        0 0 0 1px rgba(59, 130, 246, 0.15),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+}}
+
+.cycle-card-title {{
+    color: white !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    margin: 0 0 5px 0 !important;
+    letter-spacing: -0.01em;
+}}
+
+.cycle-card-desc {{
+    color: #94A3B8 !important;
+    font-size: 13.5px !important;
+    margin: 0 0 0 0 !important;
+    opacity: 0.88;
+    line-height: 1.45;
+}}
+
+/* ------------------------------------------------ */
+/* LAUNCH BUTTON — inside each card                 */
 /* ------------------------------------------------ */
 
 div.stButton {{
-    margin-top: 0px !important;
+    margin-top: 14px !important;
+    margin-bottom: 0 !important;
 }}
 
 div.stButton > button {{
-    width: 230px !important;       
-    height: 50px !important;       
-    border-radius: 14px !important;
-    border: 1px solid rgba(160,180,210,0.18) !important;
+    width: 100% !important;
+    height: 44px !important;
+    border-radius: 11px !important;
+    border: 1px solid rgba(59, 130, 246, 0.22) !important;
     background: linear-gradient(
-        180deg,
-        rgba(52,64,86,0.94),
-        rgba(24,32,46,0.98)
+        160deg,
+        rgba(37, 52, 76, 0.95),
+        rgba(18, 26, 42, 0.98)
     ) !important;
-    color: white !important;
-    font-size: 15px !important;    
+    color: #CBD5E1 !important;
+    font-size: 14px !important;
     font-weight: 500 !important;
-    letter-spacing: 0.2px !important;
+    letter-spacing: 0.25px !important;
     white-space: nowrap !important;
     transition: all 0.25s ease-in-out !important;
     box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.03),
-        0 6px 16px rgba(0,0,0,0.18) !important;
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 4px 12px rgba(0,0,0,0.18) !important;
 }}
 
-/* ------------------------------------------------ */
-/* BUTTON HOVER (HIGH SHINE METALLIC EFFECT) */
-/* ------------------------------------------------ */
-
 div.stButton > button:hover {{
-    border: 1px solid rgba(150, 200, 255, 0.6) !important;
+    border: 1px solid rgba(99, 162, 255, 0.55) !important;
     background: linear-gradient(
-        180deg,
-        rgba(86, 106, 143, 0.98),
-        rgba(45, 61, 84, 0.99)
+        160deg,
+        rgba(55, 80, 120, 0.98),
+        rgba(30, 48, 76, 0.99)
     ) !important;
     color: white !important;
     transform: translateY(-1px) !important;
     box-shadow:
-        inset 0 1px 1px rgba(255,255,255,0.15),
-        0 0 14px rgba(140, 195, 255, 0.22),
-        0 8px 24px rgba(0, 0, 0, 0.3) !important;
+        inset 0 1px 1px rgba(255,255,255,0.12),
+        0 0 16px rgba(80, 160, 255, 0.18),
+        0 6px 20px rgba(0,0,0,0.28) !important;
+}}
+
+/* ------------------------------------------------ */
+/* LOADING OVERLAY — launch simulation animation    */
+/* ------------------------------------------------ */
+
+#thermo-loading-overlay {{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 8, 18, 0.93);
+    backdrop-filter: blur(6px);
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    animation: overlayFadeIn 0.2s ease forwards;
+}}
+
+#thermo-loading-overlay.active {{
+    display: flex;
+}}
+
+@keyframes overlayFadeIn {{
+    from {{ opacity: 0; }}
+    to   {{ opacity: 1; }}
+}}
+
+/* spinner ring */
+.thermo-spinner {{
+    width: 58px;
+    height: 58px;
+    border: 3px solid rgba(59, 130, 246, 0.15);
+    border-top-color: #3B82F6;
+    border-radius: 50%;
+    animation: spinRing 0.85s linear infinite;
+    box-shadow: 0 0 18px rgba(59, 130, 246, 0.30);
+}}
+
+@keyframes spinRing {{
+    to {{ transform: rotate(360deg); }}
+}}
+
+/* inner pulse dot */
+.thermo-spinner-inner {{
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: #3B82F6;
+    border-radius: 50%;
+    animation: pulseDot 0.85s ease-in-out infinite alternate;
+    box-shadow: 0 0 10px #3B82F6;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}}
+
+@keyframes pulseDot {{
+    from {{ opacity: 0.4; transform: translate(-50%,-50%) scale(0.8); }}
+    to   {{ opacity: 1;   transform: translate(-50%,-50%) scale(1.15); }}
+}}
+
+.spinner-wrap {{
+    position: relative;
+    width: 58px;
+    height: 58px;
+}}
+
+.thermo-loading-text {{
+    color: #93C5FD;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    animation: textPulse 1.2s ease-in-out infinite alternate;
+}}
+
+@keyframes textPulse {{
+    from {{ opacity: 0.5; }}
+    to   {{ opacity: 1; }}
+}}
+
+.thermo-loading-sub {{
+    color: #475569;
+    font-family: 'Inter', sans-serif;
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+}}
+
+/* ------------------------------------------------ */
+/* BACK BUTTON (used on cycle pages via injection)  */
+/* ------------------------------------------------ */
+
+.back-btn-wrap {{
+    margin-bottom: 10px;
+}}
+
+.back-btn {{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    background: rgba(20, 28, 44, 0.82);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 10px;
+    color: #94A3B8 !important;
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: all 0.22s ease;
+    backdrop-filter: blur(6px);
+}}
+
+.back-btn:hover {{
+    border-color: rgba(99, 162, 255, 0.4);
+    color: #CBD5E1 !important;
+    background: rgba(30, 44, 68, 0.92);
+    transform: translateX(-2px);
+    box-shadow: 0 0 12px rgba(59,130,246,0.14);
 }}
 
 </style>
+
+<!-- Loading Overlay -->
+<div id="thermo-loading-overlay">
+    <div class="spinner-wrap">
+        <div class="thermo-spinner"></div>
+        <div class="thermo-spinner-inner"></div>
+    </div>
+    <div class="thermo-loading-text">Initializing Simulation…</div>
+    <div class="thermo-loading-sub">Loading thermodynamic model</div>
+</div>
+
+<script>
+// Show overlay on any Launch Simulation button click, hide after 1.4s
+(function() {{
+    function attachListeners() {{
+        document.querySelectorAll('[data-testid="stButton"] > button, .stButton > button').forEach(function(btn) {{
+            if (btn.dataset.thermoHooked) return;
+            btn.dataset.thermoHooked = '1';
+            btn.addEventListener('click', function() {{
+                var overlay = document.getElementById('thermo-loading-overlay');
+                if (overlay) {{
+                    overlay.classList.add('active');
+                    setTimeout(function() {{
+                        overlay.classList.remove('active');
+                    }}, 1500);
+                }}
+            }});
+        }});
+    }}
+    // Re-attach after Streamlit re-renders
+    var obs = new MutationObserver(attachListeners);
+    obs.observe(document.body, {{ childList: true, subtree: true }});
+    attachListeners();
+}})();
+</script>
 """, unsafe_allow_html=True)
 
 # ------------------------------------------------
-# HEADER
+# HEADER  — improved typography hierarchy
 # ------------------------------------------------
 
 st.markdown(
@@ -191,82 +420,38 @@ st.markdown(
 )
 
 # ------------------------------------------------
-# CYCLE DATA
+# CYCLE DATA — with icons
 # ------------------------------------------------
 
 cycles = [
-    {
-        "name": "Carnot Cycle",
-        "desc": "Ideal reversible thermodynamic cycle"
-    },
-    {
-        "name": "Otto Cycle",
-        "desc": "Petrol engine power cycle"
-    },
-    {
-        "name": "Diesel Cycle",
-        "desc": "Compression ignition engine cycle"
-    },
-    {
-        "name": "Dual Cycle",
-        "desc": "Mixed combustion engine cycle"
-    },
-    {
-        "name": "Brayton Cycle",
-        "desc": "Gas turbine power cycle"
-    },
-    {
-        "name": "Rankine Cycle",
-        "desc": "Steam turbine power plant cycle"
-    },
-    {
-        "name": "Refrigeration Cycle",
-        "desc": "Cooling and refrigeration cycle"
-    }
+    {"name": "Carnot Cycle",        "desc": "Ideal reversible thermodynamic cycle",   "icon": "❄️",  "page": "pages/carnot_page.py"},
+    {"name": "Otto Cycle",          "desc": "Petrol engine power cycle",               "icon": "🚗",  "page": "pages/otto_page.py"},
+    {"name": "Diesel Cycle",        "desc": "Compression ignition engine cycle",       "icon": "⚙️",  "page": "pages/diesel_page.py"},
+    {"name": "Dual Cycle",          "desc": "Mixed combustion engine cycle",           "icon": "🔩",  "page": "pages/dual_page.py"},
+    {"name": "Brayton Cycle",       "desc": "Gas turbine power cycle",                 "icon": "🔥",  "page": "pages/brayton_page.py"},
+    {"name": "Rankine Cycle",       "desc": "Steam turbine power plant cycle",         "icon": "♨️",  "page": "pages/rankine_page.py"},
+    {"name": "Refrigeration Cycle", "desc": "Cooling and refrigeration cycle",         "icon": "🧊",  "page": "pages/refrigerator_page.py"},
 ]
 
 # ------------------------------------------------
-# GRID (CUSTOM TARGETS FOR CLEAN SHRUNK CARD HEIGHTS)
+# GRID — 2-column, cards contain buttons
 # ------------------------------------------------
 
 col1, col2 = st.columns(2, gap="medium")
 
 for i, cycle in enumerate(cycles):
     target_col = col1 if i % 2 == 0 else col2
+    delay = f"{0.08 * i:.2f}s"
+
     with target_col:
-        
-        # Pure HTML block completely strips Streamlit's forced vertical stretching layout
+        # Card wrapper with staggered fade-up entry animation
         st.markdown(f"""
-            <div style="
-                background: rgba(18, 24, 38, 0.65);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                border-radius: 20px;
-                padding: 18px 22px;
-                margin-top: 10px;
-                margin-bottom: 12px;
-                box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
-            ">
-                <h3 style="color: white !important; font-size: 20px !important; font-weight: 600 !important; margin: 0 0 6px 0 !important;">{cycle['name']}</h3>
-                <p style="color: #E2E8F0 !important; font-size: 14.5px !important; margin: 0 0 16px 0 !important; opacity: 0.85;">{cycle['desc']}</p>
+            <div class="cycle-card card-animate" style="animation-delay: {delay};">
+                <h3 class="cycle-card-title">{cycle['icon']}&nbsp; {cycle['name']}</h3>
+                <p  class="cycle-card-desc">{cycle['desc']}</p>
             </div>
         """, unsafe_allow_html=True)
-        
-        # Placed perfectly right under the compact text container box
-        if st.button(
-            "Launch Simulation →",
-            key=cycle['name']
-        ):
-            if cycle['name'] == "Carnot Cycle":
-                st.switch_page("pages/carnot_page.py")
-            elif cycle['name'] == "Otto Cycle":
-                st.switch_page("pages/otto_page.py")
-            elif cycle['name'] == "Diesel Cycle":
-                st.switch_page("pages/diesel_page.py")
-            elif cycle['name'] == "Dual Cycle":
-                st.switch_page("pages/dual_page.py")
-            elif cycle['name'] == "Brayton Cycle":
-                st.switch_page("pages/brayton_page.py")
-            elif cycle['name'] == "Rankine Cycle":
-                st.switch_page("pages/rankine_page.py")
-            elif cycle['name'] == "Refrigeration Cycle":
-                st.switch_page("pages/refrigerator_page.py")
+
+        # Launch button sits visually "inside" the card (immediately after, no gap)
+        if st.button("Launch Simulation →", key=cycle['name']):
+            st.switch_page(cycle['page'])
