@@ -12,62 +12,7 @@ st.set_page_config(
     page_title="Brayton Cycle",
     layout="wide"
 )
-# ================================================================
-# BACK BUTTON — paste this near the TOP of every cycle page,
-# directly after st.set_page_config() and any CSS st.markdown().
-# ================================================================
 
-st.markdown("""
-<style>
-.back-btn-wrap {
-    margin-bottom: 4px;
-    margin-top: 2px;
-}
-.back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 7px 15px 7px 11px;
-    background: rgba(18, 24, 38, 0.70);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 10px;
-    color: #94A3B8 !important;
-    font-family: 'Inter', sans-serif;
-    font-size: 13.5px;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    text-decoration: none !important;
-    cursor: pointer;
-    transition: color 0.22s ease, border-color 0.22s ease,
-                background 0.22s ease, transform 0.22s ease,
-                box-shadow 0.22s ease;
-}
-.back-btn:hover {
-    color: #E2E8F0 !important;
-    border-color: rgba(99, 162, 255, 0.40);
-    background: rgba(30, 42, 64, 0.88);
-    transform: translateX(-3px);
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.12);
-    text-decoration: none !important;
-}
-.back-btn .back-arrow {
-    font-size: 15px;
-    line-height: 1;
-    transition: transform 0.22s ease;
-}
-.back-btn:hover .back-arrow {
-    transform: translateX(-2px);
-}
-</style>
-<div class="back-btn-wrap">
-    <a class="back-btn" href="/" target="_self">
-        <span class="back-arrow">←</span>
-        Back to Home
-    </a>
-</div>
-""", unsafe_allow_html=True)
 # ------------------------------------------------
 # CUSTOM STYLES (UI Polish & Modern Typography)
 # ------------------------------------------------

@@ -1,9 +1,9 @@
 import streamlit as st
 import base64
 
-# ------------------------------------------------
+# ================================================
 # PAGE CONFIG
-# ------------------------------------------------
+# ================================================
 
 st.set_page_config(
     page_title="ThermoSim",
@@ -11,9 +11,9 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ------------------------------------------------
-# LOAD BACKGROUND IMAGE
-# ------------------------------------------------
+# ================================================
+# UTILITIES
+# ================================================
 
 def get_base64(file_path):
     with open(file_path, "rb") as f:
@@ -22,28 +22,78 @@ def get_base64(file_path):
 
 bg_image = get_base64("assets/ThermoSim_background_image.png")
 
-# ------------------------------------------------
-# CUSTOM CSS
-# ------------------------------------------------
+# ================================================
+# CYCLE DATA
+# ================================================
+
+CYCLES = [
+    {
+        "name": "Carnot Cycle",
+        "icon": "❄",
+        "desc": "Ideal reversible thermodynamic cycle establishing maximum theoretical efficiency",
+        "page": "pages/carnot_page.py",
+    },
+    {
+        "name": "Otto Cycle",
+        "icon": "🚗",
+        "desc": "Spark-ignition petrol engine cycle with constant-volume heat addition",
+        "page": "pages/otto_page.py",
+    },
+    {
+        "name": "Diesel Cycle",
+        "icon": "⚙",
+        "desc": "Compression-ignition engine cycle with constant-pressure combustion",
+        "page": "pages/diesel_page.py",
+    },
+    {
+        "name": "Dual Cycle",
+        "icon": "🔩",
+        "desc": "Combined constant-volume and constant-pressure heat addition cycle",
+        "page": "pages/dual_page.py",
+    },
+    {
+        "name": "Brayton Cycle",
+        "icon": "🔥",
+        "desc": "Gas turbine power cycle used in jet engines and power generation",
+        "page": "pages/brayton_page.py",
+    },
+    {
+        "name": "Rankine Cycle",
+        "icon": "♨",
+        "desc": "Steam turbine cycle underpinning most thermal power plants",
+        "page": "pages/rankine_page.py",
+    },
+    {
+        "name": "Refrigeration Cycle",
+        "icon": "❄",
+        "desc": "Vapour-compression cycle for cooling and heat-pump applications",
+        "page": "pages/refrigerator_page.py",
+    },
+]
+
+# ================================================
+# CSS
+# ================================================
 
 st.markdown(f"""
 <style>
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* ── Fonts ─────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* ============================================================ */
-/* FORCE DARK MODE                                              */
-/* ============================================================ */
-
+/* ── Permanent dark mode ────────────────────────── */
 :root, html, body {{
     color-scheme: dark only !important;
-    --background-color:           #080C14 !important;
-    --secondary-background-color: #0D1321 !important;
-    --text-color:                 #E2E8F0 !important;
+    --background-color:           #07090F !important;
+    --secondary-background-color: #0D1220 !important;
+    --text-color:                 #D8E0EE !important;
     --font:                       'Inter', sans-serif !important;
 }}
 
 html, body,
+.stApp,
+.main,
+.block-container,
 [data-testid="stAppViewContainer"],
 [data-testid="stHeader"],
 [data-testid="stSidebar"],
@@ -51,42 +101,33 @@ html, body,
 [data-testid="stToolbar"],
 [data-testid="stDecoration"],
 [data-testid="stBottom"],
-.stApp, .main, .block-container,
 section[data-testid="stSidebar"] {{
     background-color: transparent !important;
-    color: #E2E8F0 !important;
+    color: #D8E0EE !important;
+    font-family: 'Inter', sans-serif !important;
 }}
 
-[data-baseweb], [data-baseweb="select"],
-[data-baseweb="input"], [data-baseweb="textarea"],
-.stTextInput > div, .stSelectbox > div,
-.stSlider, .stNumberInput,
-[role="listbox"], [role="option"],
-.css-1d391kg, .css-12oz5g7 {{
-    background-color: #0D1321 !important;
-    color: #E2E8F0 !important;
+[data-baseweb="input"],
+[data-baseweb="select"],
+[data-baseweb="textarea"],
+.stTextInput > div,
+.stSelectbox > div,
+.stSlider,
+.stNumberInput,
+[role="listbox"],
+[role="option"] {{
+    background-color: #0D1220 !important;
+    color: #D8E0EE !important;
     border-color: rgba(255,255,255,0.10) !important;
 }}
 
+/* hide theme toggle and Streamlit chrome */
+header, footer, #MainMenu                {{ visibility: hidden; }}
 [data-testid="stDecoration"],
-button[aria-label*="theme"],
-button[aria-label*="Theme"],
-[data-testid="baseButton-headerNoPadding"] {{
-    display: none !important;
-}}
+button[aria-label*="heme"],
+[data-testid="baseButton-headerNoPadding"] {{ display: none !important; }}
 
-/* ============================================================ */
-/* GLOBAL                                                       */
-/* ============================================================ */
-
-html, body, [class*="css"] {{
-    font-family: 'Inter', sans-serif;
-}}
-
-/* ============================================================ */
-/* BACKGROUND                                                   */
-/* ============================================================ */
-
+/* ── Background ─────────────────────────────────── */
 .stApp {{
     background-image: url("data:image/png;base64,{bg_image}");
     background-size: cover;
@@ -94,24 +135,25 @@ html, body, [class*="css"] {{
     background-attachment: fixed;
 }}
 
+/* layer 1 — primary dark wash (keeps renders atmospheric, not dominating) */
 .stApp::before {{
     content: "";
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.50);
+    inset: 0;
+    background: rgba(5, 7, 14, 0.58);
     z-index: 0;
     pointer-events: none;
 }}
 
+/* layer 2 — radial vignette: edges darker, centre breathes */
 .stApp::after {{
     content: "";
     position: fixed;
     inset: 0;
     background: radial-gradient(
-        ellipse 75% 65% at 50% 48%,
-        rgba(0,0,0,0.0) 0%,
-        rgba(0,0,0,0.30) 100%
+        ellipse 80% 70% at 50% 42%,
+        rgba(5,7,14,0.0)  0%,
+        rgba(5,7,14,0.42) 100%
     );
     z-index: 0;
     pointer-events: none;
@@ -122,163 +164,211 @@ html, body, [class*="css"] {{
     z-index: 1;
 }}
 
-/* ============================================================ */
-/* REMOVE STREAMLIT CHROME                                      */
-/* ============================================================ */
-
-header    {{ visibility: hidden; }}
-footer    {{ visibility: hidden; }}
-#MainMenu {{ visibility: hidden; }}
-
-/* ============================================================ */
-/* MAIN CONTAINER                                               */
-/* ============================================================ */
-
+/* ── Layout ─────────────────────────────────────── */
 .block-container {{
-    max-width: 1150px;
-    padding-top: 1.5rem;
-    padding-bottom: 2rem;
+    max-width: 1120px;
+    padding-top:    2rem   !important;
+    padding-bottom: 2.5rem !important;
+    padding-left:   1.5rem !important;
+    padding-right:  1.5rem !important;
 }}
 
-/* ============================================================ */
-/* TITLE                                                        */
-/* ============================================================ */
-
-.main-title {{
+/* ── Hero header ────────────────────────────────── */
+.ts-hero {{
     text-align: center;
-    font-size: 36px;
+    margin-bottom: 8px;
+}}
+
+.ts-wordmark {{
+    display: inline-block;
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(34px, 5vw, 52px);
     font-weight: 700;
-    letter-spacing: -0.01em !important;
-    margin-bottom: 6px;
-    margin-top: 4px;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    color: #F0F4FF;
+    text-transform: uppercase;
 }}
 
-.white-text {{ color: white; }}
-.blue-text  {{ color: #3B82F6; margin-left: 3px; }}
+.ts-wordmark span {{
+    color: #4A90D9;
+}}
 
-/* ============================================================ */
-/* SUBTITLE                                                     */
-/* ============================================================ */
+/* thin accent rule beneath title */
+.ts-rule {{
+    display: block;
+    width: 48px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #4A90D9, transparent);
+    margin: 10px auto 0;
+    border-radius: 2px;
+    opacity: 0.7;
+}}
 
-.subtitle {{
+.ts-subtitle {{
     text-align: center;
-    font-size: 19px;
-    color: #93C5FD !important;
-    margin-bottom: 32px;
-    font-weight: 600 !important;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    color: #5A6E8C;
+    margin-top: 14px;
+    margin-bottom: 36px;
 }}
 
-/* ============================================================ */
-/* BUTTON — base style (idle state)                             */
-/* ============================================================ */
+/* ── Section label ──────────────────────────────── */
+.ts-section-label {{
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #3A4E68;
+    margin-bottom: 14px;
+    padding-left: 2px;
+}}
 
+/* ── Cycle card ─────────────────────────────────── */
+.ts-card {{
+    background: rgba(13, 18, 32, 0.68);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    padding: 16px 18px 14px;
+    margin-bottom: 10px;
+    transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.28);
+    cursor: default;
+}}
+
+.ts-card:hover {{
+    border-color: rgba(74,144,217,0.30);
+    box-shadow:
+        0 4px 18px rgba(0,0,0,0.32),
+        0 0 0 1px rgba(74,144,217,0.12);
+    transform: translateY(-2px);
+}}
+
+.ts-card-header {{
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 5px;
+}}
+
+.ts-card-icon {{
+    font-size: 15px;
+    line-height: 1;
+    opacity: 0.88;
+    flex-shrink: 0;
+}}
+
+.ts-card-title {{
+    font-size: 14.5px !important;
+    font-weight: 600 !important;
+    color: #E8EEF8 !important;
+    letter-spacing: 0.01em;
+    margin: 0 !important;
+    line-height: 1.3;
+}}
+
+.ts-card-desc {{
+    font-size: 12px !important;
+    color: #6B7E99 !important;
+    line-height: 1.55;
+    margin: 0 !important;
+    padding-left: 24px;   /* aligns under title, past the icon */
+}}
+
+/* ── Launch button ──────────────────────────────── */
 div.stButton {{
-    margin-top: 0px !important;
+    margin-top: 0 !important;
+    margin-bottom: 10px !important;
 }}
 
 div.stButton > button {{
-    width: 230px !important;
-    height: 50px !important;
-    border-radius: 14px !important;
-    border: 1px solid rgba(160,180,210,0.18) !important;
-    background: linear-gradient(
-        180deg,
-        rgba(52,64,86,0.94),
-        rgba(24,32,46,0.98)
-    ) !important;
-    color: white !important;
-    font-size: 15px !important;
+    width: 100% !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(74,144,217,0.20) !important;
+    background: rgba(16, 24, 42, 0.82) !important;
+    color: #8BAFD4 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 12.5px !important;
     font-weight: 500 !important;
-    letter-spacing: 0.2px !important;
+    letter-spacing: 0.06em !important;
     white-space: nowrap !important;
-    transition: all 0.25s ease-in-out !important;
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.03),
-        0 6px 16px rgba(0,0,0,0.18) !important;
+    transition: all 0.20s ease !important;
+    box-shadow: none !important;
 }}
 
 div.stButton > button:hover {{
-    border: 1px solid rgba(150,200,255,0.6) !important;
-    background: linear-gradient(
-        180deg,
-        rgba(86,106,143,0.98),
-        rgba(45,61,84,0.99)
-    ) !important;
-    color: white !important;
+    border-color: rgba(74,144,217,0.55) !important;
+    background: rgba(26, 44, 74, 0.90) !important;
+    color: #C5DAFA !important;
     transform: translateY(-1px) !important;
-    box-shadow:
-        inset 0 1px 1px rgba(255,255,255,0.15),
-        0 0 14px rgba(140,195,255,0.22),
-        0 8px 24px rgba(0,0,0,0.3) !important;
+    box-shadow: 0 0 12px rgba(74,144,217,0.15), 0 4px 14px rgba(0,0,0,0.22) !important;
+}}
+
+div.stButton > button:active {{
+    transform: translateY(0px) !important;
+    box-shadow: none !important;
+}}
+
+/* ── Responsive: single column on narrow viewports ── */
+@media (max-width: 720px) {{
+    .ts-wordmark {{
+        font-size: 32px;
+        letter-spacing: 0.08em;
+    }}
+    .block-container {{
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }}
 }}
 
 </style>
 """, unsafe_allow_html=True)
 
-# ------------------------------------------------
-# HEADER
-# ------------------------------------------------
+# ================================================
+# HERO
+# ================================================
 
-st.markdown(
-    """
-    <h1 class="main-title">
-        <span class="white-text">THERMO</span><span class="blue-text">SIM</span>
-    </h1>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("""
+<div class="ts-hero">
+    <div class="ts-wordmark">THERMO<span>SIM</span></div>
+    <span class="ts-rule"></span>
+</div>
+<div class="ts-subtitle">Computational Thermodynamic Cycle Simulator</div>
+""", unsafe_allow_html=True)
 
-st.markdown(
-    '<div class="subtitle">Select a Thermodynamic Cycle to Simulate</div>',
-    unsafe_allow_html=True
-)
+# ================================================
+# SECTION LABEL
+# ================================================
 
-# ------------------------------------------------
-# CYCLE DATA
-# ------------------------------------------------
+st.markdown('<div class="ts-section-label">Select a cycle to simulate</div>', unsafe_allow_html=True)
 
-cycles = [
-    {"name": "Carnot Cycle",        "icon": "❄",  "desc": "Ideal reversible thermodynamic cycle",  "page": "pages/carnot_page.py"},
-    {"name": "Otto Cycle",          "icon": "🚗", "desc": "Petrol engine power cycle",              "page": "pages/otto_page.py"},
-    {"name": "Diesel Cycle",        "icon": "⚙",  "desc": "Compression ignition engine cycle",      "page": "pages/diesel_page.py"},
-    {"name": "Dual Cycle",          "icon": "🔩", "desc": "Mixed combustion engine cycle",          "page": "pages/dual_page.py"},
-    {"name": "Brayton Cycle",       "icon": "🔥", "desc": "Gas turbine power cycle",                "page": "pages/brayton_page.py"},
-    {"name": "Rankine Cycle",       "icon": "♨",  "desc": "Steam turbine power plant cycle",        "page": "pages/rankine_page.py"},
-    {"name": "Refrigeration Cycle", "icon": "❄",  "desc": "Cooling and refrigeration cycle",        "page": "pages/refrigerator_page.py"},
-]
-
-# ------------------------------------------------
+# ================================================
 # GRID
-# ------------------------------------------------
+# ================================================
 
-col1, col2 = st.columns(2, gap="medium")
+col_left, col_right = st.columns(2, gap="medium")
 
-for i, cycle in enumerate(cycles):
-    target_col = col1 if i % 2 == 0 else col2
-    with target_col:
+for i, cycle in enumerate(CYCLES):
+    col = col_left if i % 2 == 0 else col_right
 
+    with col:
+        # Card — info only, no button inside
         st.markdown(f"""
-            <div style="
-                background: rgba(18, 24, 38, 0.65);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                border-radius: 20px;
-                padding: 18px 22px;
-                margin-top: 10px;
-                margin-bottom: 12px;
-                box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
-                transition: border-color 0.25s ease, box-shadow 0.25s ease;
-            ">
-                <h3 style="color: white !important; font-size: 16px !important; font-weight: 600 !important; margin: 0 0 5px 0 !important;">
-                    {cycle['icon']}&nbsp; {cycle['name']}
-                </h3>
-                <p style="color: #E2E8F0 !important; font-size: 13.5px !important; margin: 0 0 14px 0 !important; opacity: 0.75;">
-                    {cycle['desc']}
-                </p>
+        <div class="ts-card">
+            <div class="ts-card-header">
+                <span class="ts-card-icon">{cycle['icon']}</span>
+                <p class="ts-card-title">{cycle['name']}</p>
             </div>
+            <p class="ts-card-desc">{cycle['desc']}</p>
+        </div>
         """, unsafe_allow_html=True)
 
-        # Direct navigation — no sleep, no session state detour
-        if st.button("Launch Simulation →", key=cycle['name']):
+        # Launch button — outside card, directly below
+        if st.button("Launch Simulation", key=cycle['name']):
             st.switch_page(cycle['page'])
