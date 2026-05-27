@@ -1,6 +1,5 @@
 import streamlit as st
 import base64
-import time
 
 # ------------------------------------------------
 # PAGE CONFIG
@@ -11,107 +10,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
-
-# ------------------------------------------------
-# SESSION STATE — controls loading animation flow
-# ------------------------------------------------
-
-if "launch_target" not in st.session_state:
-    st.session_state.launch_target = None
-if "launching" not in st.session_state:
-    st.session_state.launching = False
-
-# ------------------------------------------------
-# NAVIGATION STEP 2:
-# If we are in "launching" state, show spinner,
-# wait briefly, then navigate.
-# ------------------------------------------------
-
-if st.session_state.launching and st.session_state.launch_target:
-    target = st.session_state.launch_target
-    st.session_state.launching = False
-    st.session_state.launch_target = None
-
-    # ---- FULL-SCREEN LOADING OVERLAY ----
-    st.markdown("""
-    <style>
-    html, body, .stApp, [data-testid="stAppViewContainer"] {
-        background: #080C14 !important;
-    }
-    .loading-screen {
-        position: fixed;
-        inset: 0;
-        background: #080C14;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 22px;
-        z-index: 99999;
-    }
-    .spinner-ring {
-        width: 64px;
-        height: 64px;
-        border: 3px solid rgba(59, 130, 246, 0.12);
-        border-top-color: #3B82F6;
-        border-radius: 50%;
-        animation: spin 0.9s linear infinite;
-        box-shadow: 0 0 22px rgba(59,130,246,0.25), 0 0 6px rgba(59,130,246,0.15);
-        position: relative;
-    }
-    .spinner-dot {
-        position: absolute;
-        width: 10px;
-        height: 10px;
-        background: #60A5FA;
-        border-radius: 50%;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%,-50%);
-        animation: dotpulse 0.9s ease-in-out infinite alternate;
-        box-shadow: 0 0 10px #3B82F6;
-    }
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-    @keyframes dotpulse {
-        from { opacity: 0.3; transform: translate(-50%,-50%) scale(0.7); }
-        to   { opacity: 1;   transform: translate(-50%,-50%) scale(1.2); }
-    }
-    .loading-label {
-        color: #93C5FD;
-        font-family: 'Inter', sans-serif;
-        font-size: 13.5px;
-        font-weight: 500;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        animation: textblink 1.1s ease-in-out infinite alternate;
-    }
-    .loading-sub {
-        color: #334155;
-        font-family: 'Inter', sans-serif;
-        font-size: 11px;
-        letter-spacing: 0.10em;
-        margin-top: -10px;
-    }
-    @keyframes textblink {
-        from { opacity: 0.45; }
-        to   { opacity: 1; }
-    }
-    </style>
-    <div class="loading-screen">
-        <div class="spinner-ring"><div class="spinner-dot"></div></div>
-        <div class="loading-label">Initializing Simulation…</div>
-        <div class="loading-sub">Loading thermodynamic model</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Hold for 1.4 seconds so the user sees the animation
-    time.sleep(1.4)
-
-    # Now navigate
-    st.switch_page(target)
-    st.stop()
 
 # ------------------------------------------------
 # LOAD BACKGROUND IMAGE
@@ -134,7 +32,7 @@ st.markdown(f"""
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* ============================================================ */
-/* FORCE DARK MODE — override every Streamlit light-theme var   */
+/* FORCE DARK MODE                                              */
 /* ============================================================ */
 
 :root, html, body {{
@@ -145,7 +43,6 @@ st.markdown(f"""
     --font:                       'Inter', sans-serif !important;
 }}
 
-/* Kill any white/light surfaces Streamlit renders */
 html, body,
 [data-testid="stAppViewContainer"],
 [data-testid="stHeader"],
@@ -154,14 +51,12 @@ html, body,
 [data-testid="stToolbar"],
 [data-testid="stDecoration"],
 [data-testid="stBottom"],
-.stApp,
-.main, .block-container,
+.stApp, .main, .block-container,
 section[data-testid="stSidebar"] {{
     background-color: transparent !important;
     color: #E2E8F0 !important;
 }}
 
-/* Prevent white flash on any widget */
 [data-baseweb], [data-baseweb="select"],
 [data-baseweb="input"], [data-baseweb="textarea"],
 .stTextInput > div, .stSelectbox > div,
@@ -173,7 +68,6 @@ section[data-testid="stSidebar"] {{
     border-color: rgba(255,255,255,0.10) !important;
 }}
 
-/* Hide any theme-toggle Streamlit injects */
 [data-testid="stDecoration"],
 button[aria-label*="theme"],
 button[aria-label*="Theme"],
@@ -182,7 +76,7 @@ button[aria-label*="Theme"],
 }}
 
 /* ============================================================ */
-/* GLOBAL                                                        */
+/* GLOBAL                                                       */
 /* ============================================================ */
 
 html, body, [class*="css"] {{
@@ -190,13 +84,7 @@ html, body, [class*="css"] {{
 }}
 
 /* ============================================================ */
-/* BACKGROUND — heavy overlay to suppress image noise           */
-/*                                                              */
-/* The bg image itself cannot be dimmed in CSS (it's data-URI). */
-/* We stack TWO overlays:                                       */
-/*   ::before  — very dark base  rgba(0,0,0,0.72)               */
-/*   ::after   — centre vignette so cards pop                   */
-/* Together this brings the bg renders into ~0.18-0.25 range.   */
+/* BACKGROUND                                                   */
 /* ============================================================ */
 
 .stApp {{
@@ -204,35 +92,31 @@ html, body, [class*="css"] {{
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    /* Also desaturate/dim the image itself via filter */
-    isolation: isolate;
 }}
 
-/* Primary dark suppression layer */
 .stApp::before {{
     content: "";
     position: fixed;
-    inset: 0;
-    background: rgba(4, 8, 18, 0.78);
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.50);
     z-index: 0;
     pointer-events: none;
 }}
 
-/* Vignette — edges darker, centre slightly lighter for focus */
 .stApp::after {{
     content: "";
     position: fixed;
     inset: 0;
     background: radial-gradient(
-        ellipse 70% 60% at 50% 45%,
-        rgba(4, 8, 18, 0.0) 0%,
-        rgba(4, 8, 18, 0.55) 100%
+        ellipse 75% 65% at 50% 48%,
+        rgba(0,0,0,0.0) 0%,
+        rgba(0,0,0,0.30) 100%
     );
     z-index: 0;
     pointer-events: none;
 }}
 
-/* Ensure main content renders above the overlay layers */
 [data-testid="stAppViewContainer"] > .main {{
     position: relative;
     z-index: 1;
@@ -285,7 +169,7 @@ footer    {{ visibility: hidden; }}
 }}
 
 /* ============================================================ */
-/* BUTTON                                                       */
+/* BUTTON — base style (idle state)                             */
 /* ============================================================ */
 
 div.stButton {{
@@ -311,24 +195,102 @@ div.stButton > button {{
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.03),
         0 6px 16px rgba(0,0,0,0.18) !important;
+    position: relative !important;
+    overflow: hidden !important;
 }}
 
 div.stButton > button:hover {{
-    border: 1px solid rgba(150, 200, 255, 0.6) !important;
+    border: 1px solid rgba(150,200,255,0.6) !important;
     background: linear-gradient(
         180deg,
-        rgba(86, 106, 143, 0.98),
-        rgba(45, 61, 84, 0.99)
+        rgba(86,106,143,0.98),
+        rgba(45,61,84,0.99)
     ) !important;
     color: white !important;
     transform: translateY(-1px) !important;
     box-shadow:
         inset 0 1px 1px rgba(255,255,255,0.15),
-        0 0 14px rgba(140, 195, 255, 0.22),
-        0 8px 24px rgba(0, 0, 0, 0.3) !important;
+        0 0 14px rgba(140,195,255,0.22),
+        0 8px 24px rgba(0,0,0,0.3) !important;
+}}
+
+/* ---- LAUNCHING state — applied by JS on click ---- */
+
+div.stButton > button.btn-launching {{
+    border: 1px solid rgba(99,162,255,0.70) !important;
+    background: linear-gradient(
+        180deg,
+        rgba(55,80,124,0.98),
+        rgba(24,38,64,0.99)
+    ) !important;
+    color: rgba(255,255,255,0.0) !important;   /* hide text — spinner takes over */
+    box-shadow:
+        0 0 0 3px rgba(59,130,246,0.15),
+        0 0 18px rgba(59,130,246,0.30),
+        0 6px 20px rgba(0,0,0,0.30) !important;
+    transform: translateY(-1px) !important;
+    pointer-events: none !important;
+    cursor: default !important;
+}}
+
+/* tiny spinner rendered as ::after pseudo on the button */
+div.stButton > button.btn-launching::after {{
+    content: "";
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin-top: -8px !important;
+    margin-left: -8px !important;
+    border: 2px solid rgba(147,197,253,0.25) !important;
+    border-top-color: #93C5FD !important;
+    border-radius: 50% !important;
+    animation: btn-spin 0.55s linear infinite !important;
+    box-shadow: 0 0 6px rgba(147,197,253,0.4) !important;
+}}
+
+@keyframes btn-spin {{
+    to {{ transform: rotate(360deg); }}
+}}
+
+/* page-level fade-out on navigate */
+.page-fade-out {{
+    animation: pageFade 0.35s ease forwards !important;
+}}
+
+@keyframes pageFade {{
+    to {{ opacity: 0; }}
 }}
 
 </style>
+
+<script>
+(function() {{
+    function hookButtons() {{
+        var btns = document.querySelectorAll('div.stButton > button');
+        btns.forEach(function(btn) {{
+            if (btn.dataset.launchHooked) return;
+            btn.dataset.launchHooked = '1';
+            btn.addEventListener('click', function() {{
+                // Apply launching style instantly
+                btn.classList.add('btn-launching');
+                // Fade the whole main content area out
+                var main = document.querySelector('[data-testid="stAppViewContainer"] > .main');
+                if (main) {{
+                    main.style.transition = 'opacity 0.35s ease';
+                    main.style.opacity = '0';
+                }}
+                // Streamlit will navigate server-side; the fade covers the brief delay
+            }});
+        }});
+    }}
+    // Re-hook after every Streamlit re-render
+    var obs = new MutationObserver(hookButtons);
+    obs.observe(document.body, {{ childList: true, subtree: true }});
+    hookButtons();
+}})();
+</script>
 """, unsafe_allow_html=True)
 
 # ------------------------------------------------
@@ -354,13 +316,13 @@ st.markdown(
 # ------------------------------------------------
 
 cycles = [
-    {"name": "Carnot Cycle",        "desc": "Ideal reversible thermodynamic cycle",  "page": "pages/carnot_page.py"},
-    {"name": "Otto Cycle",          "desc": "Petrol engine power cycle",              "page": "pages/otto_page.py"},
-    {"name": "Diesel Cycle",        "desc": "Compression ignition engine cycle",      "page": "pages/diesel_page.py"},
-    {"name": "Dual Cycle",          "desc": "Mixed combustion engine cycle",          "page": "pages/dual_page.py"},
-    {"name": "Brayton Cycle",       "desc": "Gas turbine power cycle",                "page": "pages/brayton_page.py"},
-    {"name": "Rankine Cycle",       "desc": "Steam turbine power plant cycle",        "page": "pages/rankine_page.py"},
-    {"name": "Refrigeration Cycle", "desc": "Cooling and refrigeration cycle",        "page": "pages/refrigerator_page.py"},
+    {"name": "Carnot Cycle",        "icon": "❄",  "desc": "Ideal reversible thermodynamic cycle",  "page": "pages/carnot_page.py"},
+    {"name": "Otto Cycle",          "icon": "🚗", "desc": "Petrol engine power cycle",              "page": "pages/otto_page.py"},
+    {"name": "Diesel Cycle",        "icon": "⚙",  "desc": "Compression ignition engine cycle",      "page": "pages/diesel_page.py"},
+    {"name": "Dual Cycle",          "icon": "🔩", "desc": "Mixed combustion engine cycle",          "page": "pages/dual_page.py"},
+    {"name": "Brayton Cycle",       "icon": "🔥", "desc": "Gas turbine power cycle",                "page": "pages/brayton_page.py"},
+    {"name": "Rankine Cycle",       "icon": "♨",  "desc": "Steam turbine power plant cycle",        "page": "pages/rankine_page.py"},
+    {"name": "Refrigeration Cycle", "icon": "❄",  "desc": "Cooling and refrigeration cycle",        "page": "pages/refrigerator_page.py"},
 ]
 
 # ------------------------------------------------
@@ -376,20 +338,25 @@ for i, cycle in enumerate(cycles):
         st.markdown(f"""
             <div style="
                 background: rgba(18, 24, 38, 0.65);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
                 border: 1px solid rgba(255, 255, 255, 0.08);
                 border-radius: 20px;
                 padding: 18px 22px;
                 margin-top: 10px;
                 margin-bottom: 12px;
                 box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
+                transition: border-color 0.25s ease, box-shadow 0.25s ease;
             ">
-                <h3 style="color: white !important; font-size: 20px !important; font-weight: 600 !important; margin: 0 0 6px 0 !important;">{cycle['name']}</h3>
-                <p style="color: #E2E8F0 !important; font-size: 14.5px !important; margin: 0 0 16px 0 !important; opacity: 0.85;">{cycle['desc']}</p>
+                <h3 style="color: white !important; font-size: 20px !important; font-weight: 600 !important; margin: 0 0 6px 0 !important;">
+                    {cycle['icon']}&nbsp; {cycle['name']}
+                </h3>
+                <p style="color: #E2E8F0 !important; font-size: 14.5px !important; margin: 0 0 16px 0 !important; opacity: 0.85;">
+                    {cycle['desc']}
+                </p>
             </div>
         """, unsafe_allow_html=True)
 
-        # Button sets session state → triggers animation on next re-run
+        # Direct navigation — no sleep, no session state detour
         if st.button("Launch Simulation →", key=cycle['name']):
-            st.session_state.launch_target = cycle['page']
-            st.session_state.launching = True
-            st.rerun()
+            st.switch_page(cycle['page'])
